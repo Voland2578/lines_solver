@@ -47,8 +47,9 @@ val board = predefinedCells.foldLeft(dummy)((myB, nextCell) =>
 
 //println(calcNeighbours(board, predefinedCells(4)))
 //println(calcNeighbours(board, new PredefinedCell(1, "L", 2, 1)))
-//println(chooseCombinations(calcNeighbours(board, predefinedCells(4)),2))
-
+val xx = chooseCombinations(board, calcNeighbours(board, predefinedCells(4)),
+  Nil,List[List[(Int, Int)]](), predefinedCells(4).value, predefinedCells(4).value).map (x => x.sorted).toSet
+println(xx.mkString("\n"))
 /**
   * Returns a list of directional neighbours
   * @param board
@@ -75,22 +76,41 @@ def calcNeighbours(board: Vector[Vector[Option[Cell]]], cell: PredefinedCell): L
   List(up, down, left, right).filter(_.nonEmpty)
 }
 
-def chooseCombinations(l: List[List[(Int,Int)]], remaining: Int) :List[(Int,Int)] = {
+def chooseCombinations(
+                       board: Vector[Vector[Option[Cell]]],
+                       l: List[List[(Int,Int)]],
+                       local_accumulator: List[(Int, Int)],
+                       result_accumulator: List[List[(Int, Int)]],
+                       max_depth: Int,
+                       remaining: Int) : List[List[(Int,Int)]] = {
 
-  // 2 possibilities
-
-
-
-
-
-  // not sure about the base case yet
-  if (l.isEmpty) Nil
+  if (l.isEmpty) result_accumulator;
   else {
-    // chose a list of first elements
-    for {
-        x<-l;
-        if x.nonEmpty
-    } yield x(0)
+     l.zipWithIndex.foldLeft(result_accumulator) ( (accum, nextList) => {
+        // add the data
+       if (remaining == 0) {
+         System.err.println("Added " + local_accumulator)
+         return accum :+ local_accumulator
+       }
+       val element_idx = nextList._2
+       // check if this is currently available on the board
+       board()
+
+
+       // for each one of the lists, we can take 1 element
+       val local_accum = {
+         if (max_depth == remaining) List(nextList._1.head) else local_accumulator :+ nextList._1.head
+       }
+       val remainingElements = {
+          // drop the list completely if empty
+         if (nextList._1.size == 1) l.take(element_idx) ++ l.drop(element_idx+1) else l.updated(element_idx, l(element_idx).drop(1))
+       }
+       chooseCombinations(board, remainingElements,local_accum,accum, max_depth,remaining-1)
+
+
+     }
+     )
+
   }
 
 }
@@ -104,89 +124,6 @@ def chooseCombinations(l: List[List[(Int,Int)]], remaining: Int) :List[(Int,Int)
 
 
 
-
-
-
-//
-//
-//val predefined = (board flatMap (x => x map( y => y match {
-//  case p:Some[Cell]=>p
-//  case None   => None
-//})) filter( x => x.isDefined))
-//
-//
-////
-////  map (y => y match {
-////  case x:Some[PredefinedCell] => x.get.calcNeigh()
-////  case None =>
-////
-////}
-////)
-//
-//
-//def process(predicates: Array[Option[Cell]], myB: Array[Array[Option[Cell]]]) = {
-//  for {
-//    x:Option[Cell] <- predicates
-//    (r,c) <- {
-//      x.get match {
-//        case (c:PredefinedCell) =>  c.calcNeigh()
-//      }
-//    }
-//    if x.get.value>0
-//  } yield {
-//
-//  }
-//
-//    //println(r,c)
-//
-//}
-//
-//
-//process(predefined, board)
-
-
-/**
-  * update on (2:Brown:(0,1)) rows(0 .. 2) columns (0..3
-  * Running update on (2:Red:(1,1)) rows(0 .. 3) columns (0..3
-  * Running update on (3:Blue:(2,0)) rows(0 .. 3) columns (0..3
-  * Running update on (2:Yellow:(2,3)) rows(0 .. 3) columns (1..3
-  * Running update on (2:Green:(3,3)) rows(1 .. 3) columns (1..3
-  */
-
-
-/*
-
-   val possibleValues: List[(Int, String)]   = options
-   // remove the value from the list of options
-   def minusValue(c:String) = new Cell(v, c, this.options filterNot (x=>x._2 != c))
-
- */
-
-//
-//
-//val predefined = board flatMap (x => x map( y => y match {
-//  case p:Some[Cell]=>p
-//  case None   => None
-//})) filter( x => x.isDefined)
-//
-//for {
-//  x<-predefined
-//} yield updateBoard(board, x.get)
-////predefined(0)
-//
-//printBoard(board)
-
-
-//board(3)(2).
-
-
-//
-//val b:Option[Cell] =  board(1)(1)
-//b match {
-//  case Some(_) => print( "S ")
-//  case None    => print(" d")
-//}
-//
 
 
 def printBoard(board: Array[Array[Option[Cell]]]): Unit = {
